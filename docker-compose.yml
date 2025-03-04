@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  java-disassembler:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly
+    volumes:
+      - ~/.m2:/root/.m2
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

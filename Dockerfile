@@ -15,7 +15,16 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libstdc++-10-dev \
     default-jdk \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /tmp/work \
+    && chmod 777 /tmp/work \
+    && which objdump \
+    && objdump --version \
+    && objdump -h /bin/ls
+
+# Set permissions for temp directory
+ENV WORK_DIR=/tmp/work
+ENV JAVA_TMPDIR=/tmp/work
 
 # Install GraalVM
 ENV GRAALVM_VERSION="22.3.2"

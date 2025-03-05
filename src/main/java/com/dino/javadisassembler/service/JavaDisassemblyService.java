@@ -1,5 +1,6 @@
 package com.dino.javadisassembler.service;
 
+import com.dino.javadisassembler.exception.CompilationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -21,7 +23,7 @@ public class JavaDisassemblyService {
     /**
      * Compiles Java source code to bytecode and returns the bytecode disassembly
      */
-    public String getBytecode(String sourceCode, String className) throws Exception {
+    public String getBytecode(String sourceCode, String className) throws CompilationException, IOException {
         logger.info("Starting bytecode disassembly for class: {}", className);
         // Create a unique working directory
         String workingDirName = UUID.randomUUID().toString();
@@ -42,15 +44,15 @@ public class JavaDisassemblyService {
             boolean compiled = compileJavaFile(sourceFile);
             if (!compiled) {
                 logger.error("Compilation failed for class: {}", className);
-                throw new Exception("Compilation failed");
+                throw new CompilationException("Compilation failed");
             }
             logger.info("Successfully compiled class: {}", className);
 
             // Get bytecode using javap
             return getBytecodeDisassembly(workingDir, className);
         } catch (Exception e) {
-            logger.error("Error during bytecode disassembly for class {}: {}", className, e.getMessage(), e);
-            throw e;
+            logger.error("Error during bytecode disassembly for class {}:", className,  e);
+            throw new CompilationException(e);
         } finally {
             // Clean up
             deleteDirectory(workingDir);
@@ -62,9 +64,10 @@ public class JavaDisassemblyService {
      * Removed AOT assembly functionality for now
      */
     public String getAotAssembly(String sourceCode, String className) throws Exception {
-        return "AOT assembly currently disabled.\n" +
-               "We are working on improving this feature.\n" +
-               "Please try the bytecode or JIT assembly views instead.";
+        return """
+               AOT assembly currently disabled.
+               We are working on improving this feature.
+               Please try the bytecode or JIT assembly views instead.""";
     }
 
     /**
@@ -91,7 +94,7 @@ public class JavaDisassemblyService {
             boolean compiled = compileJavaFile(sourceFile);
             if (!compiled) {
                 logger.error("Compilation failed for class: {}", className);
-                throw new Exception("Compilation failed");
+                throw new CompilationException("Compilation failed");
             }
             logger.info("Successfully compiled class: {}", className);
 
@@ -124,7 +127,7 @@ public class JavaDisassemblyService {
         return success;
     }
 
-    private String getBytecodeDisassembly(File workingDir, String className) throws IOException, InterruptedException {
+    private String getBytecodeDisassembly(File workingDir, String className) throws IOException, CompilationException, InterruptedException {
         logger.debug("Starting bytecode disassembly for class: {}", className);
         ProcessBuilder processBuilder = new ProcessBuilder(
                 "javap", "-c", "-verbose", "-p", className
@@ -137,7 +140,7 @@ public class JavaDisassemblyService {
         if (!completed) {
             logger.warn("Disassembly timed out for class: {}", className);
             process.destroyForcibly();
-            throw new InterruptedException("Disassembly timed out");
+            throw new CompilationException("Disassembly timed out");
         }
 
         return new String(process.getInputStream().readAllBytes());
@@ -186,9 +189,10 @@ public class JavaDisassemblyService {
 
     private void deleteDirectory(File directory) throws IOException {
         logger.debug("Deleting directory: {}", directory);
-        Files.walk(directory.toPath())
-                .sorted((p1, p2) -> -p1.compareTo(p2))
+        try (var dir = Files.walk(directory.toPath())) {
+                dir.sorted(Comparator.reverseOrder())
                 .map(Path::toFile)
                 .forEach(File::delete);
+             }
     }
 }

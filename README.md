@@ -238,7 +238,7 @@ Please follow the existing code style and include appropriate tests.
 
 ## License
 
-[MIT License](LICENSE)
+[Apache 2.0 License](LICENSE)
 
 ## Acknowledgements
 

@@ -2,14 +2,20 @@ package com.dino.javadisassembler.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import java.nio.file.Path;
 import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JavaDisassemblyServiceTest {
+@ExtendWith(MockitoExtension.class)
+public class JavaDisassemblyServiceTest {
 
+    @InjectMocks
     private JavaDisassemblyService disassemblyService;
     private static final String TEST_CLASS_NAME = "TestClass";
     private static final String SIMPLE_CLASS = 
@@ -22,6 +28,38 @@ class JavaDisassemblyServiceTest {
     @BeforeEach
     void setUp() {
         disassemblyService = new JavaDisassemblyService();
+    }
+
+    @Test
+    public void getBytecode_ValidCode_ShouldReturnBytecode() throws Exception {
+        String sourceCode = "public class Test {\n" +
+                          "    public static void main(String[] args) {\n" +
+                          "        System.out.println(\"Hello\");\n" +
+                          "    }\n" +
+                          "}";
+        String result = disassemblyService.getBytecode(sourceCode, "Test");
+        assertNotNull(result);
+        assertTrue(result.contains("public static void main(java.lang.String[])"));
+    }
+
+    @Test
+    public void getBytecode_InvalidCode_ShouldThrowException() {
+        String sourceCode = "invalid code";
+        Exception exception = assertThrows(Exception.class, () -> 
+            disassemblyService.getBytecode(sourceCode, "Test")
+        );
+        assertTrue(exception.getMessage().contains("Compilation failed"));
+    }
+
+    @Test
+    public void getJitAssembly_ValidCode_ShouldReturnAssembly() throws Exception {
+        String sourceCode = "public class Test {\n" +
+                          "    public static void main(String[] args) {\n" +
+                          "        System.out.println(\"Hello\");\n" +
+                          "    }\n" +
+                          "}";
+        String result = disassemblyService.getJitAssembly(sourceCode, "Test");
+        assertNotNull(result);
     }
 
     @Test

@@ -28,7 +28,7 @@
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Logger>
-        <Logger name="com.dino.javadisassembler.controler" level="info" additivity="false">
+        <Logger name="com.dino.javadisassembler.controller" level="info" additivity="false">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="RollingFile"/>
         </Logger>

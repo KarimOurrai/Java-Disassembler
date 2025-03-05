@@ -1,4 +1,4 @@
-package com.dino.javadisassembler.controler;
+package com.dino.javadisassembler.controller;
 
 import com.dino.javadisassembler.service.JavaDisassemblyService;
 import com.dino.javadisassembler.model.CompilationRequest;

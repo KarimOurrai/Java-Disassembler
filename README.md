@@ -7,7 +7,7 @@ A web application similar to Godbolt but for Java, allowing you to view bytecode
 - Java source code editor with syntax highlighting
 - Bytecode disassembly (using javap)
 - JIT assembly output (using HotSpot PrintAssembly)
-~~- AOT assembly output (using GraalVM native-image)~~ disabled for now it takes more than 5 minutes for a hello word and need better way to pull just the relevant ASM for the class
+- ~~AOT assembly output (using GraalVM native-image)~~ disabled for now it takes more than 5 minutes for a hello word and need better way to pull just the relevant ASM for the class
 - Modern React frontend
 
 ## Prerequisites

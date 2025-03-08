@@ -5,25 +5,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.nio.file.Path;
-import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class JavaDisassemblyServiceTest {
+class JavaDisassemblyServiceTest {
 
     @InjectMocks
     private JavaDisassemblyService disassemblyService;
     private static final String TEST_CLASS_NAME = "TestClass";
-    private static final String SIMPLE_CLASS = 
-        "public class TestClass {\n" +
-        "    public static void main(String[] args) {\n" +
-        "        System.out.println(\"Hello, World!\");\n" +
-        "    }\n" +
-        "}";
+    private static final String SIMPLE_CLASS = """
+                               class Test {
+                                  static void main(String[] args) {
+                                       System.out.println("Hello");
+                                  }
+                               }""";
 
     @BeforeEach
     void setUp() {
@@ -31,19 +27,20 @@ public class JavaDisassemblyServiceTest {
     }
 
     @Test
-    public void getBytecode_ValidCode_ShouldReturnBytecode() throws Exception {
-        String sourceCode = "public class Test {\n" +
-                          "    public static void main(String[] args) {\n" +
-                          "        System.out.println(\"Hello\");\n" +
-                          "    }\n" +
-                          "}";
+    void getBytecode_ValidCode_ShouldReturnBytecode() throws Exception {
+        String sourceCode = """
+                          class Test {
+                             static void main(String[] args) {
+                                  System.out.println("Hello");
+                             }
+                          }""";
         String result = disassemblyService.getBytecode(sourceCode, "Test");
         assertNotNull(result);
-        assertTrue(result.contains("public static void main(java.lang.String[])"));
+        assertTrue(result.contains("static void main(java.lang.String[])"));
     }
 
     @Test
-    public void getBytecode_InvalidCode_ShouldThrowException() {
+    void getBytecode_InvalidCode_ShouldThrowException() {
         String sourceCode = "invalid code";
         Exception exception = assertThrows(Exception.class, () -> 
             disassemblyService.getBytecode(sourceCode, "Test")
@@ -52,12 +49,13 @@ public class JavaDisassemblyServiceTest {
     }
 
     @Test
-    public void getJitAssembly_ValidCode_ShouldReturnAssembly() throws Exception {
-        String sourceCode = "public class Test {\n" +
-                          "    public static void main(String[] args) {\n" +
-                          "        System.out.println(\"Hello\");\n" +
-                          "    }\n" +
-                          "}";
+    void getJitAssembly_ValidCode_ShouldReturnAssembly() throws Exception {
+        String sourceCode = """
+                          class Test {
+                             static void main(String[] args) {
+                                  System.out.println("Hello");
+                             }
+                          }""";
         String result = disassemblyService.getJitAssembly(sourceCode, "Test");
         assertNotNull(result);
     }
@@ -67,7 +65,7 @@ public class JavaDisassemblyServiceTest {
         String result = disassemblyService.getBytecode(SIMPLE_CLASS, TEST_CLASS_NAME);
         
         assertNotNull(result);
-        assertTrue(result.contains("public static void main(java.lang.String[])"));
+        assertTrue(result.contains("static void main(java.lang.String[])"));
         assertTrue(result.contains("getstatic"));
         assertTrue(result.contains("invokevirtual"));
     }

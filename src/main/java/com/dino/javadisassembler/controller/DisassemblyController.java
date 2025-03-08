@@ -27,19 +27,18 @@ public class DisassemblyController {
     public ResponseEntity<CompilationResponse> getBytecode(@RequestBody CompilationRequest request) {
         String sanitizedClassName = InputSanitizer.sanitizeClassName(request.getClassName());
         String sanitizedSourceCode = InputSanitizer.sanitizeSourceCode(request.getSourceCode());
-        logger.info("Received bytecode disassembly request for class: {}", 
-            InputSanitizer.sanitizeForLog(sanitizedClassName));
+        logger.info("Received bytecode disassembly request for class: {}", sanitizedSourceCode);
         try {
             String result = disassemblyService.getBytecode(
                     sanitizedSourceCode,
                     sanitizedClassName
             );
             logger.info("Successfully processed bytecode request for class: {}", 
-                InputSanitizer.sanitizeForLog(sanitizedClassName));
+                sanitizedClassName);
             return ResponseEntity.ok(new CompilationResponse(true, result, null));
         } catch (Exception e) {
             logger.error("Error processing bytecode request for class {}: {}", 
-                InputSanitizer.sanitizeForLog(sanitizedClassName), 
+                sanitizedClassName, 
                 InputSanitizer.sanitizeForLog(e.getMessage()), e);
             return ResponseEntity.ok(new CompilationResponse(false, null, e.getMessage()));
         }
@@ -50,18 +49,24 @@ public class DisassemblyController {
         String sanitizedClassName = InputSanitizer.sanitizeClassName(request.getClassName());
         String sanitizedSourceCode = InputSanitizer.sanitizeSourceCode(request.getSourceCode());
         logger.info("Received JIT assembly request for class: {}", 
-            InputSanitizer.sanitizeForLog(sanitizedClassName));
+            sanitizedClassName);
         try {
             String result = disassemblyService.getJitAssembly(
                     sanitizedSourceCode,
                     sanitizedClassName
             );
             logger.info("Successfully processed JIT assembly request for class: {}", 
-                InputSanitizer.sanitizeForLog(sanitizedClassName));
+                sanitizedClassName);
             return ResponseEntity.ok(new CompilationResponse(true, result, null));
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.error("Interrupted JIT assembly request for class {}: {}",
+                sanitizedClassName,
+                InputSanitizer.sanitizeForLog(e.getMessage()), e);
+            return ResponseEntity.ok(new CompilationResponse(false, null, e.getMessage()));
         } catch (Exception e) {
             logger.error("Error processing JIT assembly request for class {}: {}", 
-                InputSanitizer.sanitizeForLog(sanitizedClassName), 
+                sanitizedClassName, 
                 InputSanitizer.sanitizeForLog(e.getMessage()), e);
             return ResponseEntity.ok(new CompilationResponse(false, null, e.getMessage()));
         }
@@ -72,18 +77,18 @@ public class DisassemblyController {
         String sanitizedClassName = InputSanitizer.sanitizeClassName(request.getClassName());
         String sanitizedSourceCode = InputSanitizer.sanitizeSourceCode(request.getSourceCode());
         logger.info("Received AOT assembly request for class: {}", 
-            InputSanitizer.sanitizeForLog(sanitizedClassName));
+            sanitizedClassName);
         try {
             String result = disassemblyService.getAotAssembly(
                     sanitizedSourceCode,
                     sanitizedClassName
             );
             logger.info("Successfully processed AOT assembly request for class: {}", 
-                InputSanitizer.sanitizeForLog(sanitizedClassName));
+                sanitizedClassName);
             return ResponseEntity.ok(new CompilationResponse(true, result, null));
         } catch (Exception e) {
             logger.error("Error processing AOT assembly request for class {}: {}", 
-                InputSanitizer.sanitizeForLog(sanitizedClassName), 
+                sanitizedClassName, 
                 InputSanitizer.sanitizeForLog(e.getMessage()), e);
             return ResponseEntity.ok(new CompilationResponse(false, null, e.getMessage()));
         }

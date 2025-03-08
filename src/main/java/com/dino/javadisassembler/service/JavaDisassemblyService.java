@@ -55,7 +55,7 @@ public class JavaDisassemblyService {
             Thread.currentThread().interrupt();
             throw new CompilationException(e);
         }catch (Exception e) {
-            logger.error("Error during bytecode disassembly for class {}:", className,  e);
+            logger.error("Error during bytecode disassembly for class {}:", className);
             throw new CompilationException(e);
         } finally {
             // Clean up
@@ -67,11 +67,11 @@ public class JavaDisassemblyService {
     /**
      * Removed AOT assembly functionality for now
      */
-    public String getAotAssembly(String sourceCode, String className) throws Exception {
+    public String getAotAssembly(String sourceCode, String className) {
         return """
                AOT assembly currently disabled.
                We are working on improving this feature.
-               Please try the bytecode or JIT assembly views instead.""";
+               Please try the bytecode or JIT assembly views instead.""" + " \n" +sourceCode + "\n" + className;
     }
 
     /**
@@ -105,7 +105,7 @@ public class JavaDisassemblyService {
             // Get JIT assembly using hsdis and PrintAssembly
             return getJitAssemblyOutput(workingDir, className);
         } catch (Exception e) {
-            logger.error("Error during JIT assembly for class {}: {}", className, e.getMessage());
+            logger.error("Error during JIT assembly for class {}", className);
             throw e;
         } finally {
             // Clean up

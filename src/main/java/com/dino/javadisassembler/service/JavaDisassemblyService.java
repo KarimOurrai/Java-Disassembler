@@ -50,7 +50,11 @@ public class JavaDisassemblyService {
 
             // Get bytecode using javap
             return getBytecodeDisassembly(workingDir, className);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            logger.error("Interuption {}:", className);
+            Thread.currentThread().interrupt();
+            throw new CompilationException(e);
+        }catch (Exception e) {
             logger.error("Error during bytecode disassembly for class {}:", className,  e);
             throw new CompilationException(e);
         } finally {
@@ -73,7 +77,7 @@ public class JavaDisassemblyService {
     /**
      * Returns JIT compiler output using -XX:+PrintAssembly
      */
-    public String getJitAssembly(String sourceCode, String className) throws Exception {
+    public String getJitAssembly(String sourceCode, String className) throws CompilationException, IOException, InterruptedException {
         logger.info("Starting JIT assembly for class: {}", className);
         // Create a unique working directory
         String workingDirName = UUID.randomUUID().toString();
@@ -101,7 +105,7 @@ public class JavaDisassemblyService {
             // Get JIT assembly using hsdis and PrintAssembly
             return getJitAssemblyOutput(workingDir, className);
         } catch (Exception e) {
-            logger.error("Error during JIT assembly for class {}: {}", className, e.getMessage(), e);
+            logger.error("Error during JIT assembly for class {}: {}", className, e.getMessage());
             throw e;
         } finally {
             // Clean up

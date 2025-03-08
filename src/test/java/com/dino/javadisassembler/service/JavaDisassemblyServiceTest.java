@@ -15,7 +15,7 @@ class JavaDisassemblyServiceTest {
     private JavaDisassemblyService disassemblyService;
     private static final String TEST_CLASS_NAME = "TestClass";
     private static final String SIMPLE_CLASS = """
-                               class Test {
+                               class TestClass {
                                   static void main(String[] args) {
                                        System.out.println("Hello");
                                   }
@@ -74,9 +74,8 @@ class JavaDisassemblyServiceTest {
     void getBytecode_ShouldThrowExceptionForInvalidJavaCode() {
         String invalidCode = "invalid java code";
         
-        Exception exception = assertThrows(Exception.class, () -> {
-            disassemblyService.getBytecode(invalidCode, TEST_CLASS_NAME);
-        });
+        Exception exception = assertThrows(Exception.class, () -> disassemblyService
+                .getBytecode(invalidCode, TEST_CLASS_NAME));
         
         assertTrue(exception.getMessage().contains("Compilation failed"));
     }
@@ -94,9 +93,9 @@ class JavaDisassemblyServiceTest {
     }
 
     @Test
-    void getAotAssembly_ShouldReturnAssemblyForValidJavaCode() throws Exception {
+    void getAotAssembly_ShouldReturnAssemblyForValidJavaCode() {
         // Skip if native-image is not available
-        if (!isNativeImageAvailable()) {
+        if (isNoNativeImageAvailable()) {
             return;
         }
 
@@ -109,27 +108,26 @@ class JavaDisassemblyServiceTest {
     @Test
     void getAotAssembly_ShouldThrowExceptionForInvalidJavaCode() {
         // Skip if native-image is not available
-        if (!isNativeImageAvailable()) {
+        if (isNoNativeImageAvailable()) {
             return;
         }
 
         String invalidCode = "invalid java code";
         
-        Exception exception = assertThrows(Exception.class, () -> {
-            disassemblyService.getAotAssembly(invalidCode, TEST_CLASS_NAME);
-        });
+        Exception exception = assertThrows(Exception.class, () -> disassemblyService
+                .getAotAssembly(invalidCode, TEST_CLASS_NAME));
         
         assertTrue(exception.getMessage().contains("Compilation failed"));
     }
 
-    private boolean isNativeImageAvailable() {
+    private boolean isNoNativeImageAvailable() {
         try {
             Process process = new ProcessBuilder("native-image", "--version")
                 .redirectErrorStream(true)
                 .start();
-            return process.waitFor() == 0;
+            return process.waitFor() != 0;
         } catch (Exception e) {
-            return false;
+            return true;
         }
     }
 }
